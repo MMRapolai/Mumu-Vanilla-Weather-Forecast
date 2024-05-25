@@ -99,6 +99,33 @@
         margin-top: 16px;
         font-size: 28px;
       }
+      .weather-forecast{
+        display: flex;
+        justify-content: space-around;
+        margin-top: 30px;
+      }
+      .weather-forecast-date {
+  text-align: center;
+  color: rgba(39, 33, 66, 0.4);
+  font-size: 16px;
+  line-height: 20px;
+  margin-bottom: 10px;
+}
+.weather-forecast-icon {
+  font-size: 38px;
+  text-align: center;
+}
+.weather-forecast-temperatures {
+  text-align: center;
+  color: #f65282;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.weather-forecast-temperature {
+  padding: 0 10px;
+}
       
       footer {
         border-top: 1px solid #f9f7fe;
@@ -135,10 +162,12 @@
           </div>
           <div class="weather-app-temperature-container">
             <div id="icon"></div>
-            <div class="weather-app-temperature" id = "temperature"></div>
+            <div class="weather-app-temperature" id="temperature"></div>
             <div class="weather-app-unit">°C</div>
+          </div>
         </div>
-    </div>
+        <div class="weather-forecast" id="forecast"></div>
+          
   </main>
 
       <footer>
@@ -172,6 +201,7 @@
   windSpeedElement.innerHTML = `${response.data.wind.speed}km/h`;
   temperatureElement.innerHTML = Math.round(temperature);
 iconElement.innerHTML = `<img src="${response.data.condition.icon_url}" class="weather-app-icon" />`;
+getForecast(response.data.city);
 }
 function formatDate(date){
   let minutes = date.getMinutes();
@@ -192,6 +222,39 @@ return `${day} ${hours}: ${minutes}`;}
   
   searchCity(searchInput.value);
 }
+function formatDay(timestamp){
+    let date = new Date(timestamp *1000);
+    let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+return days[date.getDay()];
+}
+function getForecast(city) {
+    let apiKey = "57b13ef26a049644t26b08bo9241280d";
+    let apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}&units=metric`;
+axios(apiUrl).then(displayForecast);
+}
+function displayForecast(response) {
+    let forecastHtml = "";
+
+response.data.daily.forEach(function (day, index) {
+    if (index < 5) {
+        forecastHtml = forecastHtml +
+      `
+      <div class="weather-forecast-day">
+        <div class="weather-forecast-date">${formatDay(day.time)}</div>
+      
+      <img src="${day.condition.icon_url}" class="weather-forecast-icon"/>
+        <div class="weather-forecast-temperatures">
+          <div class="weather-forecast-temperature">
+            <strong>${Math.round(day.temperature.maximum)}º</strong>
+          </div>
+          <div class="weather-forecast-temperature">${Math.round(day.temperature.minimum)}º</div>
+        </div>
+      </div>
+    `;
+    }
+  });
+  let forecastElement = document.querySelector("#forecast");
+  forecastElement.innerHTML = forecastHtml;}
 
 let searchFormElement = document.querySelector("#search-form");
 searchFormElement.addEventListener("submit", handleSearchSubmit);
